@@ -1,0 +1,23 @@
+{
+  "manifest_version": 2,
+  "name": "BLOCK VK",
+  "description": "BLOCK VK",
+  "version": "1.0.0",
+  "icons": {"128": "logo.png"},
+  "browser_action": {
+    "default_icon": "logo.png",
+    "default_popup": "index.html"
+  },
+  "background": {
+    "scripts": ["background.js"]
+  },
+
+  "content_scripts": [
+    {
+      "matches": [ "https://vk.com/*" ],
+      "js": [
+        "contentscript.js"
+      ]
+    }
+  ]
+}
