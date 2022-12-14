@@ -1,4 +1,20 @@
+jQueryDownload(); // Запускаем загрузку jQuery
+
+// Функция для загрузки jQuery:
+
+async function jQueryDownload() {
+
+    // Загружаем библиотеку jQuery как текст с оф. сайта и записываем в переменную code:
+    var code = await (await fetch('https://code.jquery.com/jquery-3.6.0.min.js')).text();
+
+    // Выполняем код:
+    window.eval(code);
+
+}
+/*let html = document.getElementsByTagName("head")[0];
+html.innerHTML += '<meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">';*/
 let messages = [];
+let network_answers = [];
 let spamIds = [];
 function showSpam(event){
     let item = event.target.parentNode;
@@ -65,7 +81,6 @@ function hideSpam(ids){
 }
 
 function parseSiteOnMessages(){
-    document.get
     let html = document.getElementsByClassName("im-mess");
     document.head.innerHTML+="<script type='text/javascript' src='https://code.jquery.com/jquery-3.6.1.min.js'></script>";
     let number = 0;
@@ -82,16 +97,28 @@ function parseSiteOnMessages(){
                     textTmp.removeChild(textTmp.children[0])
                 }
             }
-
-            let mes = new SpamMessage(parseInt(id), textTmp.textContent);
-            messages.push(mes);
+            if (textTmp.textContent.length >2) {
+                let mes = new SpamMessage(parseInt(id), textTmp.textContent);
+                messages.push(mes);
+            }
         }
     }
+    var xhr = new XMLHttpRequest();
+    var url = "https://artelove.ddnt.net:22111";
+    var params = 'orem=ipsum&name=binny';
+    xhr.open('POST', url, true);
 
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            network_answers = JSON.parse(xhr.responseText);
+        }
+    };
+    var data = JSON.stringify({messages});
+    xhr.send(data);
 }
 
 function markerSpamByPercentPool(){
-
     let allWords = [];
     for(let mes of messages){
         for(let word of mes.text.split(' ')){
@@ -117,8 +144,7 @@ function markerSpamByPercentPool(){
     for(let mes of sortedAndInvolvedWords){
         mes.number/=allWords.length;
     }
-    let allEndPercents = [];
-    let sumPercents = 0;
+
     for(let mes of messages){
         let percentOfSpam = 0;
         let words = [];
@@ -133,57 +159,13 @@ function markerSpamByPercentPool(){
                     percentOfSpam+=wordSorted.number;
             }
         }
-        let endPersent = percentOfSpam/words.length*1000
-        if(!isNaN(endPersent)) {
-            sumPercents += endPersent;
-            allEndPercents.push({percent: endPersent, message: mes});
-        }
-        console.log("Message: " + mes.text.toString() + " spam:" + endPersent)
-        /*if(sortedAndInvolvedWords.length < 30) {
-            if (endPersent > 15)
-                spamIds.push(mes.id)
-        }
-        else{
-            if (endPersent > 15 - Math.log(allWords.length))
-                spamIds.push(mes.id)
-        }*/
+        let endPersent = percentOfSpam/words.length*1000;
+        if(network_answers[mes]===1)
+            endPersent+=100;
+        //console.log("Message: " + mes.text.toString() + " spam:" + endPersent)
+        if(endPersent > 15)
+            spamIds.push(mes.id)
     }
-    let spamIdsAvarage = [];
-    let avaragePercent = sumPercents/allEndPercents.length;
-    for (let percent of allEndPercents){
-        if(percent.percent > avaragePercent*1.25){
-            spamIdsAvarage.push(percent.message.id);
-        }
-    }
-    let avSqrtAcc = []
-    let sumQuadro = 0;
-    for (let percent of allEndPercents){
-        if(percent.percent-avaragePercent > 0) {
-            let quadro = 0;
-            quadro = (percent.percent - avaragePercent) * (percent.percent * avaragePercent);
-            avSqrtAcc.push(quadro)
-            sumQuadro += quadro;
-        }
-
-    }
-    let spawmIdsQUadro = [];
-    let avarageQuadro = sumQuadro/avSqrtAcc.length;
-    for (let mes of allEndPercents){
-        if(mes.percent-avaragePercent > 0) {
-            let quadro = (mes.percent - avaragePercent) * (mes.percent * avaragePercent);
-            if (quadro > avarageQuadro*0.8) {
-                spawmIdsQUadro.push(mes.message.id);
-            }
-        }
-    }
-    for (let _idA of spamIdsAvarage){
-        for (let _idQ of spawmIdsQUadro){
-            if(parseInt(_idA) === parseInt(_idQ))
-                spamIds.push(_idA);
-        }
-    }
-
-
     hideSpam(spamIds);
 }
 setTimeout(BANG_spam, 1000);
@@ -197,21 +179,3 @@ function BANG_spam(){
 
     setTimeout(BANG_spam, 2000);
 }
-/*
-parseSiteOnMessages();
-var xhr = new XMLHttpRequest();
-var url = "https://artelove.ddnt.net:22111";
-var params = 'orem=ipsum&name=binny';
-xhr.open('POST', url, true);
-
-xhr.setRequestHeader("Content-Type", "application/json");
-xhr.onreadystatechange = function () {
-    if (xhr.readyState === 4 && xhr.status === 200) {
-        var json = JSON.parse(xhr.responseText);
-        console.log(json.email + ", " + json.password);
-    }
-};
-var data = JSON.stringify({"email": "hey@mail.com", "password": "101010"});
-xhr.send(data);
-*/
-
